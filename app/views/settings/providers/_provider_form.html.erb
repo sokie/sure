@@ -75,9 +75,11 @@
 
   <% # Show configuration status %>
   <% if configuration.configured? %>
+    <% has_required_fields = configuration.fields.any?(&:required) %>
+    <% status_message = has_required_fields ? "Configured and ready to use" : "Ready to use" %>
     <div class="flex items-center gap-2 mt-4">
       <div class="w-2 h-2 bg-green-500 rounded-full"></div>
-      <p class="text-sm text-secondary">Configured and ready to use</p>
+      <p class="text-sm text-secondary"><%= status_message %></p>
     </div>
   <% end %>
 </div>
