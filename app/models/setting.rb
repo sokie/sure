@@ -110,6 +110,12 @@ class Setting < RailsSettings::Base
 
     private
 
+    def dynamic_key_name(key_str)
+      "dynamic:#{key_str}"
+    end
+
+    private
+
       def dynamic_key_name(key_str)
         "dynamic:#{key_str}"
       end
