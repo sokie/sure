@@ -177,14 +177,15 @@ class LunchflowItemsController < ApplicationController
 
       # Check if this lunchflow_account is already linked
       if lunchflow_account.account_provider.present?
-        already_linked_accounts << account_data[:name]
+        already_linked_accounts << lunchflow_account.name
         next
       end
 
       # Create the internal Account with proper balance initialization
+      # Use lunchflow_account.name which has the display_name format (with institution prefix)
       account = Account.create_and_sync(
         family: Current.family,
-        name: account_data[:name],
+        name: lunchflow_account.name,
         balance: 0, # Initial balance will be set during sync
         currency: account_data[:currency] || "USD",
         accountable_type: accountable_type,
