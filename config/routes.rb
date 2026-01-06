@@ -136,6 +136,7 @@ Rails.application.routes.draw do
   resources :family_merchants, only: %i[index new create edit update destroy]
 
   resources :transfers, only: %i[new create destroy show update]
+  resources :offsets, only: %i[show update destroy]
 
   resources :imports, only: %i[index new show create destroy] do
     member do
@@ -167,6 +168,7 @@ Rails.application.routes.draw do
 
   resources :transactions, only: %i[index new create show update destroy] do
     resource :transfer_match, only: %i[new create]
+    resource :offset_match, only: %i[new create]
     resource :category, only: :update, controller: :transaction_categories
 
     collection do

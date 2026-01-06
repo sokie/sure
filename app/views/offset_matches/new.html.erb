@@ -1,0 +1,94 @@
+<%= render DS::Dialog.new do |dialog| %>
+  <% dialog.with_header(title: t(".title")) %>
+  <% dialog.with_body do %>
+    <div class="space-y-6">
+      <!-- Current Transaction Display -->
+      <div class="p-4 bg-container-inset rounded-lg">
+        <p class="text-sm text-secondary mb-2"><%= t(".current_transaction") %></p>
+        <div class="flex items-center justify-between">
+          <span class="font-medium text-primary"><%= @entry.name %></span>
+          <span class="<%= @entry.amount.positive? ? "text-red-500" : "text-green-500" %>">
+            <%= format_money @entry.amount_money %>
+          </span>
+        </div>
+        <p class="text-xs text-secondary mt-1">
+          <%= l(@entry.date, format: :long) %> &bull; <%= @entry.transaction.category&.name || t(".uncategorized") %>
+        </p>
+      </div>
+
+      <% if @mode == :expense_to_offset %>
+        <!-- Expense looking for offset (refund/cashback) -->
+        <% if @offset_candidates.any? %>
+          <%= styled_form_with(
+                url: transaction_offset_match_path(@entry),
+                scope: :offset_match,
+                class: "space-y-4",
+                data: { turbo_frame: :_top }
+              ) do |f| %>
+            <p class="text-sm text-secondary"><%= t(".select_refund") %></p>
+
+            <div class="space-y-2">
+              <% @offset_candidates.each do |candidate| %>
+                <% offset_entry = candidate.offset_transaction.entry %>
+                <label class="flex items-center gap-3 p-3 border border-primary rounded-lg cursor-pointer hover:bg-container-inset">
+                  <%= f.radio_button :matched_entry_id, offset_entry.id, class: "form-radio" %>
+                  <div class="flex-1">
+                    <div class="flex items-center justify-between">
+                      <span class="text-sm font-medium text-primary"><%= offset_entry.name %></span>
+                      <span class="text-sm text-green-500"><%= format_money offset_entry.amount_money.abs %></span>
+                    </div>
+                    <p class="text-xs text-secondary">
+                      <%= l(offset_entry.date, format: :short) %> &bull; <%= offset_entry.transaction.category&.name || t(".uncategorized") %>
+                    </p>
+                  </div>
+                </label>
+              <% end %>
+            </div>
+
+            <%= f.submit t(".link_offset"), class: "w-full" %>
+          <% end %>
+        <% else %>
+          <div class="text-center py-6">
+            <p class="text-sm text-secondary"><%= t(".no_candidates") %></p>
+          </div>
+        <% end %>
+      <% else %>
+        <!-- Refund/income looking for expense to offset -->
+        <% if @expense_candidates.any? %>
+          <%= styled_form_with(
+                url: transaction_offset_match_path(@entry),
+                scope: :offset_match,
+                class: "space-y-4",
+                data: { turbo_frame: :_top }
+              ) do |f| %>
+            <p class="text-sm text-secondary"><%= t(".select_expense") %></p>
+
+            <div class="space-y-2">
+              <% @expense_candidates.each do |candidate| %>
+                <% expense_entry = candidate.expense_transaction.entry %>
+                <label class="flex items-center gap-3 p-3 border border-primary rounded-lg cursor-pointer hover:bg-container-inset">
+                  <%= f.radio_button :matched_entry_id, expense_entry.id, class: "form-radio" %>
+                  <div class="flex-1">
+                    <div class="flex items-center justify-between">
+                      <span class="text-sm font-medium text-primary"><%= expense_entry.name %></span>
+                      <span class="text-sm text-red-500"><%= format_money expense_entry.amount_money %></span>
+                    </div>
+                    <p class="text-xs text-secondary">
+                      <%= l(expense_entry.date, format: :short) %> &bull; <%= expense_entry.transaction.category&.name || t(".uncategorized") %>
+                    </p>
+                  </div>
+                </label>
+              <% end %>
+            </div>
+
+            <%= f.submit t(".link_as_offset"), class: "w-full" %>
+          <% end %>
+        <% else %>
+          <div class="text-center py-6">
+            <p class="text-sm text-secondary"><%= t(".no_expense_candidates") %></p>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+  <% end %>
+<% end %>

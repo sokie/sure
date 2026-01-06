@@ -1,0 +1,15 @@
+---
+en:
+  offset_matches:
+    new:
+      title: Link Offset Transaction
+      current_transaction: Current Transaction
+      uncategorized: "(uncategorized)"
+      select_refund: Select a refund or cashback to offset this expense
+      select_expense: Select an expense for this refund to offset
+      link_offset: Link as offset
+      link_as_offset: Link to expense
+      no_candidates: No matching refunds found. Refunds must have the same category and be within 30 days.
+      no_expense_candidates: No matching expenses found. Expenses must have the same category and be within 30 days.
+    create:
+      success: Offset linked successfully

@@ -197,6 +197,53 @@
           ) %>
         </div>
 
+        <!-- Offset Linking Section -->
+        <% unless @entry.transaction.transfer? %>
+          <div class="flex items-center justify-between gap-4 p-3">
+            <div class="text-sm space-y-1">
+              <h4 class="text-primary"><%= t(".offset_title") %></h4>
+              <p class="text-secondary"><%= t(".offset_subtitle") %></p>
+            </div>
+
+            <%= render DS::Link.new(
+              text: t(".link_offset"),
+              icon: "rotate-ccw",
+              variant: "outline",
+              href: new_transaction_offset_match_path(@entry),
+              frame: :modal
+            ) %>
+          </div>
+
+          <%# Show existing confirmed offsets if this is an expense %>
+          <% if @entry.amount.positive? && @entry.transaction.has_offsets? %>
+            <div class="p-3 space-y-2">
+              <h4 class="text-sm text-primary font-medium"><%= t(".linked_offsets") %></h4>
+              <% @entry.transaction.offsets_as_expense.confirmed.each do |offset| %>
+                <div class="flex items-center justify-between text-sm p-2 bg-container-inset rounded">
+                  <div>
+                    <span class="text-secondary"><%= offset.offset_transaction.entry.name %></span>
+                    <span class="text-xs text-secondary ml-2">(<%= l(offset.offset_transaction.entry.date, format: :short) %>)</span>
+                  </div>
+                  <span class="text-green-500">-<%= format_money offset.offset_amount %></span>
+                </div>
+              <% end %>
+              <div class="flex items-center justify-between text-sm font-medium border-t border-primary pt-2 mt-2">
+                <span class="text-primary"><%= t(".net_expense") %></span>
+                <span class="text-primary"><%= format_money @entry.transaction.net_expense_amount %></span>
+              </div>
+            </div>
+          <% end %>
+
+          <%# Show if this transaction is linked as an offset %>
+          <% if @entry.amount.negative? && @entry.transaction.is_offset? %>
+            <div class="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg mx-3">
+              <p class="text-sm text-blue-700 dark:text-blue-300">
+                <%= t(".linked_as_offset", expense_name: @entry.transaction.offset_as_offset.expense_transaction.entry.name) %>
+              </p>
+            </div>
+          <% end %>
+        <% end %>
+
         <!-- Mark as Recurring Form -->
         <div class="flex items-center justify-between gap-2 p-3">
           <div class="text-sm space-y-1">

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_12_15_100443) do
+ActiveRecord::Schema[7.2].define(version: 2026_01_06_152346) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -733,6 +733,19 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_15_100443) do
     t.index ["uid"], name: "index_oauth_applications_on_uid", unique: true
   end
 
+  create_table "offsets", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "expense_transaction_id", null: false
+    t.uuid "offset_transaction_id", null: false
+    t.string "status", default: "pending", null: false
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["expense_transaction_id", "offset_transaction_id"], name: "idx_offsets_expense_offset_unique", unique: true
+    t.index ["expense_transaction_id"], name: "index_offsets_on_expense_transaction_id"
+    t.index ["offset_transaction_id"], name: "index_offsets_on_offset_transaction_id"
+    t.index ["status"], name: "index_offsets_on_status"
+  end
+
   create_table "oidc_identities", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "user_id", null: false
     t.string "provider", null: false
@@ -836,6 +849,16 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_15_100443) do
     t.index ["next_expected_date"], name: "index_recurring_transactions_on_next_expected_date"
   end
 
+  create_table "rejected_offsets", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "expense_transaction_id", null: false
+    t.uuid "offset_transaction_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["expense_transaction_id", "offset_transaction_id"], name: "idx_rejected_offsets_unique", unique: true
+    t.index ["expense_transaction_id"], name: "index_rejected_offsets_on_expense_transaction_id"
+    t.index ["offset_transaction_id"], name: "index_rejected_offsets_on_offset_transaction_id"
+  end
+
   create_table "rejected_transfers", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "inflow_transaction_id", null: false
     t.uuid "outflow_transaction_id", null: false
@@ -869,13 +892,10 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_15_100443) do
 
   create_table "rule_runs", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "rule_id", null: false
-    t.string "rule_name"
     t.string "execution_type", null: false
     t.string "status", null: false
-    t.integer "transactions_queued", default: 0, null: false
     t.integer "transactions_processed", default: 0, null: false
     t.integer "transactions_modified", default: 0, null: false
-    t.integer "pending_jobs_count", default: 0, null: false
     t.datetime "executed_at", null: false
     t.text "error_message"
     t.datetime "created_at", null: false
@@ -922,6 +942,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_15_100443) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.uuid "security_id"
+    t.boolean "provisional", default: false, null: false
     t.index ["security_id", "date", "currency"], name: "index_security_prices_on_security_id_and_date_and_currency", unique: true
     t.index ["security_id"], name: "index_security_prices_on_security_id"
   end
@@ -1198,11 +1219,15 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_15_100443) do
   add_foreign_key "mobile_devices", "users"
   add_foreign_key "oauth_access_grants", "oauth_applications", column: "application_id"
   add_foreign_key "oauth_access_tokens", "oauth_applications", column: "application_id"
+  add_foreign_key "offsets", "transactions", column: "expense_transaction_id", on_delete: :cascade
+  add_foreign_key "offsets", "transactions", column: "offset_transaction_id", on_delete: :cascade
   add_foreign_key "oidc_identities", "users"
   add_foreign_key "plaid_accounts", "plaid_items"
   add_foreign_key "plaid_items", "families"
   add_foreign_key "recurring_transactions", "families"
   add_foreign_key "recurring_transactions", "merchants"
+  add_foreign_key "rejected_offsets", "transactions", column: "expense_transaction_id", on_delete: :cascade
+  add_foreign_key "rejected_offsets", "transactions", column: "offset_transaction_id", on_delete: :cascade
   add_foreign_key "rejected_transfers", "transactions", column: "inflow_transaction_id"
   add_foreign_key "rejected_transfers", "transactions", column: "outflow_transaction_id"
   add_foreign_key "rule_actions", "rules"

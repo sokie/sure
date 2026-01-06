@@ -1,0 +1,7 @@
+---
+en:
+  offsets:
+    update:
+      success: Offset updated successfully
+    destroy:
+      success: Offset removed successfully

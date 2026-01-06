@@ -44,6 +44,12 @@ en:
       settings: Settings
       tags_label: Tags
       uncategorized: "(uncategorized)"
+      offset_title: Refund or Cashback?
+      offset_subtitle: Link refunds, cashback, or returns to offset this expense in your budget.
+      link_offset: Link offset
+      linked_offsets: Linked Offsets
+      net_expense: Net Expense
+      linked_as_offset: This refund is linked to "%{expense_name}"
     header:
       edit_categories: Edit categories
       edit_imports: Edit imports
