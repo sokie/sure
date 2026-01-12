@@ -218,7 +218,13 @@ class ReportsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :ok
     assert_equal "text/csv", @response.media_type
-    # Verify the CSV content is generated (should not crash)
+    assert_not_nil @response.body
+  end
+
+  test "index with pdf format" do
+    get reports_path(format: :pdf)
+    assert_response :ok
+    assert_equal "application/pdf", @response.media_type
     assert_not_nil @response.body
   end
 end

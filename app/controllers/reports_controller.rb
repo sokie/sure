@@ -44,6 +44,26 @@ class ReportsController < ApplicationController
     @reports_sections = build_reports_sections
 
     @breadcrumbs = [ [ "Home", root_path ], [ "Reports", nil ] ]
+
+    respond_to do |format|
+      format.html
+      format.pdf do
+        pdf = FinancialReportPdf.new(
+          period: @period,
+          start_date: @start_date,
+          end_date: @end_date,
+          summary_metrics: @summary_metrics,
+          trends_data: @trends_data,
+          net_worth_metrics: @net_worth_metrics,
+          investment_metrics: @investment_metrics,
+          transactions_breakdown: @transactions
+        )
+        send_data pdf.render,
+          filename: "financial_report_#{@start_date.strftime('%Y-%m-%d')}_to_#{@end_date.strftime('%Y-%m-%d')}.pdf",
+          type: "application/pdf",
+          disposition: "inline"
+      end
+    end
   end
 
   def update_preferences

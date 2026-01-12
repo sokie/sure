@@ -1,12 +1,23 @@
 <% content_for :page_header do %>
   <div class="space-y-4 mb-6">
-    <div class="space-y-1">
-      <h1 class="text-xl lg:text-3xl font-medium text-primary">
-        <%= t("reports.index.title") %>
-      </h1>
-      <p class="text-sm lg:text-base text-secondary">
-        <%= t("reports.index.subtitle") %>
-      </p>
+    <div class="flex items-start justify-between">
+      <div class="space-y-1">
+        <h1 class="text-xl lg:text-3xl font-medium text-primary">
+          <%= t("reports.index.title") %>
+        </h1>
+        <p class="text-sm lg:text-base text-secondary">
+          <%= t("reports.index.subtitle") %>
+        </p>
+      </div>
+
+      <%= render DS::Link.new(
+        text: t("reports.index.print_report", default: "Print Report"),
+        icon: "printer",
+        variant: :secondary,
+        size: :sm,
+        href: reports_path(format: :pdf, start_date: @start_date, end_date: @end_date, period_type: @period_type),
+        target: "_blank"
+      ) %>
     </div>
 
     <%# Flash messages %>
